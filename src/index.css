@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Fraunces', serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --color-paper: #fbfaf6;
+  --color-canvas: #efeae0;
+  --color-stripe: #eaf1e7;
+  --color-line: #d8d2c4;
+
+  --color-forest-50: #e7f1ea;
+  --color-forest-100: #c9ded0;
+  --color-forest-400: #2c6b4c;
+  --color-forest-600: #1f4d3a;
+  --color-forest-700: #163829;
+
+  --color-ink: #1b2430;
+  --color-ink-soft: #5b6472;
+
+  --color-gold-50: #fbf1da;
+  --color-gold-600: #b4881e;
+
+  --color-green-50: #e7f1e4;
+  --color-green-600: #2f6b45;
+  --color-green-700: #24512f;
+
+  --color-red-50: #f8e9e6;
+  --color-red-600: #a23b2e;
+  --color-red-700: #7c2c21;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-gold-50);
+}
