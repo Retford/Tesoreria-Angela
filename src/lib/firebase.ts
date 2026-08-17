@@ -2,10 +2,6 @@ import { initializeApp, type FirebaseOptions } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Todas estas claves se leen del archivo .env (ver .env.example).
-// No son secretas por naturaleza -- Firebase las usa para identificar tu
-// proyecto, no para autorizar acceso -- pero mantenerlas en variables de
-// entorno evita tener que tocar el código si cambian.
 const firebaseConfig: FirebaseOptions = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -28,6 +24,4 @@ if (firebaseConfigured) {
   db = getFirestore(app);
 }
 
-// Se exportan con "!" porque solo se usan detrás de comprobaciones de
-// `firebaseConfigured` (ver App.tsx), donde ya sabemos que existen.
 export { auth, db };
