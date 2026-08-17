@@ -4,13 +4,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { fmtSoles } from '@/lib/format';
 
+interface SummaryCardsProps {
+  saldoInicial: number;
+  totalIngresos: number;
+  totalGastos: number;
+  saldoActual: number;
+  onChangeSaldoInicial: (v: number) => void;
+}
+
 export default function SummaryCards({
   saldoInicial,
   totalIngresos,
   totalGastos,
   saldoActual,
   onChangeSaldoInicial,
-}) {
+}: SummaryCardsProps) {
   return (
     <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
       <Card className='p-4'>

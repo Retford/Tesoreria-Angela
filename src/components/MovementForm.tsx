@@ -12,12 +12,23 @@ import {
 } from '@/components/ui/select';
 import { today } from '@/lib/format';
 import { Plus } from 'lucide-react';
+import type { NuevoMovimiento, TipoMovimiento } from '@/types';
 
-export default function MovementForm({ categorias, onAdd, onAddCategoria }) {
+interface MovementFormProps {
+  categorias: string[];
+  onAdd: (m: NuevoMovimiento) => void;
+  onAddCategoria: (nombre: string) => void;
+}
+
+export default function MovementForm({
+  categorias,
+  onAdd,
+  onAddCategoria,
+}: MovementFormProps) {
   const [fecha, setFecha] = useState(today());
   const [concepto, setConcepto] = useState('');
   const [categoria, setCategoria] = useState(categorias[0]);
-  const [tipo, setTipo] = useState('Ingreso');
+  const [tipo, setTipo] = useState<TipoMovimiento>('Ingreso');
   const [importe, setImporte] = useState('');
   const [nuevaCat, setNuevaCat] = useState('');
   const [error, setError] = useState('');
@@ -91,7 +102,10 @@ export default function MovementForm({ categorias, onAdd, onAddCategoria }) {
           </div>
           <div>
             <Label>Tipo</Label>
-            <Select value={tipo} onValueChange={setTipo}>
+            <Select
+              value={tipo}
+              onValueChange={(v) => setTipo(v as TipoMovimiento)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

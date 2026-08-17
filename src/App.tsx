@@ -10,6 +10,7 @@ import CategoryBreakdown from '@/components/CategoryBreakdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Landmark, LogOut } from 'lucide-react';
+import type { NuevoMovimiento, SyncStatus } from '@/types';
 
 function ConfigMissing() {
   return (
@@ -30,9 +31,17 @@ function ConfigMissing() {
   );
 }
 
-const App = () => {
+const STATUS_LABEL: Record<SyncStatus, string> = {
+  idle: '',
+  syncing: 'Conectando...',
+  saving: 'Guardando...',
+  saved: 'Sincronizado · visible para toda la junta',
+  error: 'No se pudo sincronizar. Revisa tu conexión.',
+};
+
+export default function App() {
   const { user, loading, login, register, logout } = useAuth();
-  const [boardId, setBoardId] = useState(
+  const [boardId, setBoardId] = useState<string>(
     () => localStorage.getItem('lb-board-id') || 'principal',
   );
   const { state, update, status } = useLedger(boardId, Boolean(user));
@@ -61,7 +70,7 @@ const App = () => {
     .reduce((s, m) => s + m.importe, 0);
   const saldoActual = state.saldoInicial + totalIngresos - totalGastos;
 
-  function addMovimiento(m) {
+  function addMovimiento(m: NuevoMovimiento) {
     update((prev) => ({
       ...prev,
       movimientos: [
@@ -75,14 +84,14 @@ const App = () => {
     }));
   }
 
-  function deleteMovimiento(id) {
+  function deleteMovimiento(id: string) {
     update((prev) => ({
       ...prev,
       movimientos: prev.movimientos.filter((m) => m.id !== id),
     }));
   }
 
-  function addCategoria(nombre) {
+  function addCategoria(nombre: string) {
     update((prev) =>
       prev.categorias.includes(nombre)
         ? prev
@@ -90,17 +99,9 @@ const App = () => {
     );
   }
 
-  function setSaldoInicial(v) {
+  function setSaldoInicial(v: number) {
     update((prev) => ({ ...prev, saldoInicial: v }));
   }
-
-  const statusLabel = {
-    idle: '',
-    syncing: 'Conectando...',
-    saving: 'Guardando...',
-    saved: 'Sincronizado · visible para toda la junta',
-    error: 'No se pudo sincronizar. Revisa tu conexión.',
-  }[status];
 
   return (
     <div className='min-h-screen pb-16'>
@@ -184,11 +185,9 @@ const App = () => {
                   : 'bg-green-600'
             }`}
           />
-          <span>{statusLabel}</span>
+          <span>{STATUS_LABEL[status]}</span>
         </div>
       </main>
     </div>
   );
-};
-
-export default App;
+}

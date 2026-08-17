@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, type FirebaseOptions } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -6,7 +6,7 @@ import { getFirestore } from 'firebase/firestore';
 // No son secretas por naturaleza -- Firebase las usa para identificar tu
 // proyecto, no para autorizar acceso -- pero mantenerlas en variables de
 // entorno evita tener que tocar el código si cambian.
-const firebaseConfig = {
+const firebaseConfig: FirebaseOptions = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -19,12 +19,15 @@ export const firebaseConfigured = Boolean(
   firebaseConfig.apiKey && firebaseConfig.projectId,
 );
 
-let app, auth, db;
+let auth: ReturnType<typeof getAuth> | undefined;
+let db: ReturnType<typeof getFirestore> | undefined;
 
 if (firebaseConfigured) {
-  app = initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
 }
 
+// Se exportan con "!" porque solo se usan detrás de comprobaciones de
+// `firebaseConfigured` (ver App.tsx), donde ya sabemos que existen.
 export { auth, db };

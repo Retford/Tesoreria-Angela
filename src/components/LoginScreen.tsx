@@ -1,18 +1,24 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
+import type { UserCredential } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Landmark } from 'lucide-react';
 
-export default function LoginScreen({ onLogin, onRegister }) {
-  const [mode, setMode] = useState('login'); // login | register
+interface LoginScreenProps {
+  onLogin: (email: string, password: string) => Promise<UserCredential>;
+  onRegister: (email: string, password: string) => Promise<UserCredential>;
+}
+
+export default function LoginScreen({ onLogin, onRegister }: LoginScreenProps) {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!email.trim() || !password) {
       setError('Ingresa tu correo y contraseña.');
@@ -31,7 +37,8 @@ export default function LoginScreen({ onLogin, onRegister }) {
         await onRegister(email.trim(), password);
       }
     } catch (err) {
-      setError(traducirError(err?.code));
+      const code = (err as { code?: string })?.code;
+      setError(traducirError(code));
     } finally {
       setSubmitting(false);
     }
@@ -104,8 +111,8 @@ export default function LoginScreen({ onLogin, onRegister }) {
   );
 }
 
-function traducirError(code) {
-  const map = {
+function traducirError(code?: string): string {
+  const map: Record<string, string> = {
     'auth/invalid-email': 'El correo no es válido.',
     'auth/user-not-found': 'No existe una cuenta con ese correo.',
     'auth/wrong-password': 'Contraseña incorrecta.',
@@ -114,5 +121,5 @@ function traducirError(code) {
     'auth/weak-password': 'La contraseña es demasiado débil.',
     'auth/too-many-requests': 'Demasiados intentos. Espera un momento.',
   };
-  return map[code] || 'Ocurrió un error. Intenta de nuevo.';
+  return (code && map[code]) || 'Ocurrió un error. Intenta de nuevo.';
 }

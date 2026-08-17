@@ -2,12 +2,19 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { fmtSoles, fmtFecha } from '@/lib/format';
 import { X } from 'lucide-react';
+import type { Movimiento } from '@/types';
+
+interface MovementsTableProps {
+  movimientos: Movimiento[];
+  saldoInicial: number;
+  onDelete: (id: string) => void;
+}
 
 export default function MovementsTable({
   movimientos,
   saldoInicial,
   onDelete,
-}) {
+}: MovementsTableProps) {
   const sorted = [...movimientos].sort((a, b) => {
     if (a.fecha === b.fecha) return (a.orden || 0) - (b.orden || 0);
     return a.fecha < b.fecha ? -1 : 1;

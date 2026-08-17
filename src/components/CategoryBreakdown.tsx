@@ -1,8 +1,17 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { fmtSoles } from '@/lib/format';
+import type { Movimiento } from '@/types';
 
-export default function CategoryBreakdown({ movimientos, categorias }) {
-  const totals = {};
+interface CategoryBreakdownProps {
+  movimientos: Movimiento[];
+  categorias: string[];
+}
+
+export default function CategoryBreakdown({
+  movimientos,
+  categorias,
+}: CategoryBreakdownProps) {
+  const totals: Record<string, { ingreso: number; gasto: number }> = {};
   categorias.forEach((c) => (totals[c] = { ingreso: 0, gasto: 0 }));
   movimientos.forEach((m) => {
     if (!totals[m.categoria]) totals[m.categoria] = { ingreso: 0, gasto: 0 };

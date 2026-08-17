@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import type { LedgerState, SyncStatus } from '@/types';
 
-export const DEFAULT_CATS = [
+export const DEFAULT_CATS: string[] = [
   'Cuotas de socios',
   'Donativos',
   'Eventos / actividades',
@@ -15,20 +16,20 @@ export const DEFAULT_CATS = [
   'Otros',
 ];
 
-const EMPTY_STATE = {
+const EMPTY_STATE: LedgerState = {
   saldoInicial: 0,
   movimientos: [],
   categorias: DEFAULT_CATS,
 };
 
-export function useLedger(boardId, enabled) {
-  const [state, setState] = useState(EMPTY_STATE);
-  const [status, setStatus] = useState('idle'); // idle | syncing | saved | saving | error
+export function useLedger(boardId: string, enabled: boolean) {
+  const [state, setState] = useState<LedgerState>(EMPTY_STATE);
+  const [status, setStatus] = useState<SyncStatus>('idle');
   const applyingRemote = useRef(false);
-  const saveTimer = useRef(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!enabled || !boardId) return;
+    if (!enabled || !boardId || !db) return;
     setStatus('syncing');
     const ref = doc(db, 'juntas', boardId);
     const unsub = onSnapshot(
@@ -36,7 +37,7 @@ export function useLedger(boardId, enabled) {
       (snap) => {
         applyingRemote.current = true;
         if (snap.exists()) {
-          const data = snap.data();
+          const data = snap.data() as Partial<LedgerState>;
           setState({
             saldoInicial:
               typeof data.saldoInicial === 'number' ? data.saldoInicial : 0,
@@ -59,23 +60,26 @@ export function useLedger(boardId, enabled) {
     return unsub;
   }, [boardId, enabled]);
 
-  function update(updater) {
+  function update(updater: LedgerState | ((prev: LedgerState) => LedgerState)) {
     setState((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const next =
+        typeof updater === 'function'
+          ? (updater as (p: LedgerState) => LedgerState)(prev)
+          : updater;
       scheduleSave(next);
       return next;
     });
   }
 
-  function scheduleSave(next) {
-    if (applyingRemote.current || !boardId) return;
-    clearTimeout(saveTimer.current);
+  function scheduleSave(next: LedgerState) {
+    if (applyingRemote.current || !boardId || !db) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
     setStatus('saving');
     saveTimer.current = setTimeout(async () => {
       try {
-        await setDoc(doc(db, 'juntas', boardId), next);
+        await setDoc(doc(db!, 'juntas', boardId), next);
         setStatus('saved');
-      } catch (e) {
+      } catch {
         setStatus('error');
       }
     }, 400);
