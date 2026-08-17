@@ -10,23 +10,41 @@ interface MovementsTableProps {
   onDelete: (id: string) => void;
 }
 
-export default function MovementsTable({
-  movimientos,
-  saldoInicial,
-  onDelete,
-}: MovementsTableProps) {
+interface MovimientoConSaldo extends Movimiento {
+  ingreso: number;
+  gasto: number;
+  saldo: number;
+}
+
+// Función pura fuera del componente: la variable acumuladora vive en su
+// propio scope de función, no en un closure capturado por un callback
+// (que es justo lo que el linter de React Compiler marca como riesgoso).
+function withRunningBalance(
+  movimientos: Movimiento[],
+  saldoInicial: number,
+): MovimientoConSaldo[] {
   const sorted = [...movimientos].sort((a, b) => {
     if (a.fecha === b.fecha) return (a.orden || 0) - (b.orden || 0);
     return a.fecha < b.fecha ? -1 : 1;
   });
 
+  const rows: MovimientoConSaldo[] = [];
   let running = saldoInicial;
-  const rows = sorted.map((m) => {
+  for (const m of sorted) {
     const ingreso = m.tipo === 'Ingreso' ? m.importe : 0;
     const gasto = m.tipo === 'Gasto' ? m.importe : 0;
     running += ingreso - gasto;
-    return { ...m, ingreso, gasto, saldo: running };
-  });
+    rows.push({ ...m, ingreso, gasto, saldo: running });
+  }
+  return rows;
+}
+
+export default function MovementsTable({
+  movimientos,
+  saldoInicial,
+  onDelete,
+}: MovementsTableProps) {
+  const rows = withRunningBalance(movimientos, saldoInicial);
 
   return (
     <Card>

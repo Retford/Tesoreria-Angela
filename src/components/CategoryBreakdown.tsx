@@ -7,24 +7,37 @@ interface CategoryBreakdownProps {
   categorias: string[];
 }
 
+interface CategoriaTotales {
+  categoria: string;
+  ingreso: number;
+  gasto: number;
+}
+
+function computeTotals(
+  movimientos: Movimiento[],
+  categorias: string[],
+): CategoriaTotales[] {
+  const totals: Record<string, CategoriaTotales> = {};
+  for (const c of categorias) {
+    totals[c] = { categoria: c, ingreso: 0, gasto: 0 };
+  }
+  for (const m of movimientos) {
+    if (!totals[m.categoria])
+      totals[m.categoria] = { categoria: m.categoria, ingreso: 0, gasto: 0 };
+    if (m.tipo === 'Ingreso') totals[m.categoria].ingreso += m.importe;
+    else totals[m.categoria].gasto += m.importe;
+  }
+  return Object.values(totals).filter((t) => t.ingreso || t.gasto);
+}
+
 export default function CategoryBreakdown({
   movimientos,
   categorias,
 }: CategoryBreakdownProps) {
-  const totals: Record<string, { ingreso: number; gasto: number }> = {};
-  categorias.forEach((c) => (totals[c] = { ingreso: 0, gasto: 0 }));
-  movimientos.forEach((m) => {
-    if (!totals[m.categoria]) totals[m.categoria] = { ingreso: 0, gasto: 0 };
-    if (m.tipo === 'Ingreso') totals[m.categoria].ingreso += m.importe;
-    else totals[m.categoria].gasto += m.importe;
-  });
-
-  const entries = Object.entries(totals).filter(
-    ([, t]) => t.ingreso || t.gasto,
-  );
+  const entries = computeTotals(movimientos, categorias);
   const maxVal = Math.max(
     1,
-    ...entries.map(([, t]) => Math.max(t.ingreso, t.gasto)),
+    ...entries.map((t) => Math.max(t.ingreso, t.gasto)),
   );
 
   return (
@@ -38,7 +51,7 @@ export default function CategoryBreakdown({
             Aún no hay movimientos para desglosar.
           </p>
         )}
-        {entries.map(([cat, t]) => {
+        {entries.map((t) => {
           const neto = t.ingreso - t.gasto;
           const widthPct = Math.min(
             100,
@@ -46,10 +59,10 @@ export default function CategoryBreakdown({
           );
           return (
             <div
-              key={cat}
+              key={t.categoria}
               className='grid grid-cols-[140px_1fr_auto] items-center gap-3 text-sm'
             >
-              <span className='truncate'>{cat}</span>
+              <span className='truncate'>{t.categoria}</span>
               <div className='h-4 rounded bg-stripe overflow-hidden'>
                 <div
                   className={`h-full rounded ${neto >= 0 ? 'bg-green-600' : 'bg-red-600'}`}
