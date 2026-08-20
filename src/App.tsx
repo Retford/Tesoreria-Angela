@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Landmark, LogOut } from 'lucide-react';
 import type { NuevoMovimiento, SyncStatus } from '@/types';
+import { Cuota } from './components/Cuota';
 
 function ConfigMissing() {
   return (
@@ -163,6 +164,11 @@ export default function App() {
           onAdd={addMovimiento}
           onAddCategoria={addCategoria}
         />
+
+        <div className='flex justify-between'>
+          <Cuota cuota={50} profession='Abogado' />
+          <Cuota cuota={100} profession='Arquitecto' />
+        </div>
 
         <MovementsTable
           movimientos={state.movimientos}
